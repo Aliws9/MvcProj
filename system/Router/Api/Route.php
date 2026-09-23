@@ -4,7 +4,7 @@ namespace System\Router\Api;
 
 class Route{
 
-    public static function get($url , $executeMethod = null , $name): void {
+    public static function get($url , $executeMethod , $name): void {
         
         $executeMethod = explode('@', $executeMethod);
 
@@ -24,7 +24,7 @@ class Route{
 
     }
 
-    public static function post($url , $executeMethod = null , $name): void {
+    public static function post($url , $executeMethod , $name): void {
 
         $executeMethod = explode('@', $executeMethod);
 

@@ -36,9 +36,11 @@ class DBConnection
      private function dbConnection() {
         $options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC);
         try{
+          // dd('succ');
             return new PDO("mysql:host=" . Config::get('database.DBHOST') . ";dbname=" . Config::get('database.DBNAME'), Config::get('database.DBUSERNAME'), Config::get('database.DBPASSWORD'), $options);
         }
         catch (PDOException $e){
+          // dd('err');
             echo "error in database connection: " . $e->getMessage();
             return false;
         }

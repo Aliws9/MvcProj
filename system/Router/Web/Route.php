@@ -40,7 +40,7 @@ class Route
 
      }
 
-     public static function put($url, $executeMethod = null, $name) {
+     public static function put($url, $executeMethod, $name) {
 
           $executeMethod = explode('@', $executeMethod);
 
@@ -61,7 +61,7 @@ class Route
      }
 
 
-     public static function delete($url, $executeMethod = null, $name) {
+     public static function delete($url, $executeMethod , $name) {
 
           $executeMethod = explode('@', $executeMethod);
 

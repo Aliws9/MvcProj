@@ -58,7 +58,8 @@ trait HasExtendsContent
     private function findExtends() {
         $filePathArray = [];
         //example @extends('app.index')
-        preg_match("/s*@extends+\('([^)]+)'\)/", $this->content, $filePathArray);
+        // preg_match("/s*@extends+\('([^)]+)'\)/", $this->content, $filePathArray);
+        preg_match("/\s*@extends\('([^)]+)'\)/", $this->content, $filePathArray);
         return isset($filePathArray[1]) ? $filePathArray[1] : false;
     }
 

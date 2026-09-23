@@ -2,67 +2,65 @@
 
 namespace System\Database\ORM;
 
-use \System\Database\Traits\HasCRUD;
-// عملیات اصلی و کویری های اصلی مثل select insert و...
-
-use \System\Database\Traits\HasQueryBuilder;
-// اتصال قسمت های اجرایی مثل قرار دادن دستورات اس کیو ال یا قرار دادن where و در نهایت اجرا و execute کردن دستور دیتابیس
-
-use \System\Database\Traits\HasMethodCaller;
-// رگردوندن اسم متد های عملیاتی
-
-use \System\Database\Traits\HasRelation;
-// هندل کردن روابط دیتابیس مانند تریت لاراول
-
-use \System\Database\Traits\HasAttribute;
-// تبدیل رکورد ها و مقادیر دیتابیس به شکل آبجکت و شی مثل : user->age یعنی جدول user و فیلد age جای اینکه بنویسیم $user['age']
-
-// use \System\Database\Traits\HasSoftDelete;
-// عملیات سافت دلیت (دلخواه)
-
+use System\Database\Traits\HasAttribute;
+use System\Database\Traits\HasCRUD;
+use System\Database\Traits\HasMethodCaller;
+use System\Database\Traits\HasQueryBuilder;
+use System\Database\Traits\HasRelation;
 
 abstract class Model
 {
+    use HasAttribute, HasCRUD, HasMethodCaller, HasQueryBuilder, HasRelation;
 
-     use HasAttribute, HasCRUD, HasMethodCaller, HasQueryBuilder, HasRelation;
+    /**
+     * نام جدول دیتابیس
+     */
+    protected $table;
 
-     protected $table;
-     // نام جدول
+    /**
+     * فیلدهای قابل استفاده برای create و update
+     */
+    protected $fillable = [];
 
+    /**
+     * فیلدهایی که نباید هنگام تبدیل به attribute در دسترس باشند
+     */
+    protected $hidden = [];
 
-     protected $fillable = [];
-     // فیلد هایی که میتوانند پر بشوند یا تغیر. مثل name
+    /**
+     * نوع داده attributeها
+     */
+    protected $casts = [];
 
+    /**
+     * کلید اصلی جدول
+     */
+    protected $primaryKey = 'id';
 
-     protected $hidden = [];
-     //فیلد هایی که نیاز به استفاده یا دیده شدن ندارند . مثل پسورد
+    /**
+     * نام فیلد created_at
+     */
+    protected $createdAt = 'created_at';
 
+    /**
+     * نام فیلد updated_at
+     */
+    protected $updatedAt = 'updated_at';
 
-     protected $casts = [];
-     // فیلد هایی که مقدارشون باید سریالایز بشه. مثلا image که چند مقدار دارند
+    /**
+     * نام فیلد حذف نرم
+     */
+    protected $deletedAt = null;
 
+    /**
+     * نگهداری attributeهای مربوط به یک Model
+     *
+     * این آرایه جایگزین Dynamic Properties می‌شود.
+     */
+    protected $attributes = [];
 
-     protected $primaryKey = 'id';
-     // کلید اصلی برای استفاده در where و update
-
-
-     protected $createdAt = 'created_at';
-     protected $updatedAt = 'updated_at';
-
-     protected $deletedAt = null;
-     // softDelete
-
-
-     protected $collection = [];
-     //  کالکشنی مانند لاراول که مقادیر دیتابیس و جدول رو به صورت آرایه ذخیره میکنه و بعدا این آرایه تبدیل میشه به شی مثل $user->password
-
-
+    /**
+     * collection نتایج query
+     */
+    protected $collection = [];
 }
-
-
-
-
-
-
-
-
