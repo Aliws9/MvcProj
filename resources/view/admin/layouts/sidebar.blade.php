@@ -268,7 +268,7 @@ else
                             </a>
                         </li>
                         <li>
-                            <a href="<?= route('admin.setting.email.index') ?>">
+                            <a href="#">
                                 <span class="icon-[mdi--email-outline] size-5"></span>
                                 تنظیمات ایمیل
                             </a>

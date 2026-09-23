@@ -61,7 +61,7 @@ trait HasQueryBuilder
 
      // ---------------------------------limit-------------------------
 
-     protected function setLimit($from = null, $number) {
+     protected function setLimit($from , $number) {
           $this->limit['from'] = (int) $from;
           $this->limit['number'] = (int) $number;
 

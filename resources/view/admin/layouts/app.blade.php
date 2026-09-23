@@ -32,6 +32,7 @@
                 <!-- content -->
 
                 <div class="w-full">
+                    hhh
                     @yield('content')
                 </div>
 

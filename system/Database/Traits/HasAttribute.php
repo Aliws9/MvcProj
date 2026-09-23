@@ -2,128 +2,161 @@
 
 namespace System\Database\Traits;
 
-// طراحی و مقدار دهی collection
-// نتیجه دریافت مقادیر از دیتابیس رو به صورت آرایه در کالکشن مقدار دهی میکنیم
-// مقدار دهی این متغیر ها : collection , hidden , cast
-
-// 1_cast : تغیر و اصلاح نوع اطلاعات برای بهینه شدن سیستم. مثلا تبدیل آرایه به رشته برای ذخیره در دیتابیس و بلعکس (castEncode , castDecode) بیشتر در ذخیره سایز های مختلف تصاویر (serialize)
-// 2_hidden : فیلد هایی که نیاز نداریم نمایش داده بشن مثلا رمز عبور
-// 3_collection : مقادیر دریافتی از دیتابیس به صورت آرایه تو در تو
-
 trait HasAttribute
 {
+    /**
+     * دریافت مقدار یک attribute
+     *
+     * مثال:
+     * $user->email
+     */
+    public function __get($attribute)
+    {
+        // ابتدا attributeهای دیتابیس
+        if (array_key_exists($attribute, $this->attributes)) {
+            return $this->attributes[$attribute];
+        }
 
+        // اگر property واقعی در کلاس وجود داشته باشد
+        if (property_exists($this, $attribute)) {
+            return $this->$attribute;
+        }
 
+        return null;
+    }
 
-     private function registerAttribute($object, string $attribute, $val) {
+    /**
+     * تعیین مقدار یک attribute
+     *
+     * مثال:
+     * $user->email = 'test@example.com';
+     */
+    public function __set($attribute, $value)
+    {
+        $this->attributes[$attribute] = $value;
+    }
 
-          if ($this->inCatsAttributes($attribute) == true)
-          {
-               $object->$attribute = $this->castDecodeValue($attribute, $val);
-          } else
-          {
-               $object->$attribute = $val;
-          }
-     }
+    /**
+     * بررسی وجود یک attribute
+     *
+     * برای:
+     * isset($this->email)
+     */
+    public function __isset($attribute)
+    {
+        return isset($this->attributes[$attribute]);
+    }
 
-     protected function arrayToAttributes(array $array, $object = null) {
-          if (!$object)
-          {
-               $className = get_called_class();
-               $object = new $className;
-          }
+    /**
+     * ثبت یک attribute در Model
+     */
+    private function registerAttribute($object, string $attribute, $val)
+    {
+        if ($this->inCatsAttributes($attribute) == true) {
+            $object->__set(
+                $attribute,
+                $this->castDecodeValue($attribute, $val)
+            );
+        } else {
+            $object->__set($attribute, $val);
+        }
+    }
 
-          foreach ($array as $attribute => $value)
-          {
+    /**
+     * تبدیل آرایه دیتابیس به یک Model Object
+     */
+    protected function arrayToAttributes(array $array, $object = null)
+    {
+        if (!$object) {
+            $className = get_called_class();
+            $object = new $className;
+        }
 
-               if ($this->inHiddenAttributes($attribute) == true)
-                    continue;
+        foreach ($array as $attribute => $value) {
+            if ($this->inHiddenAttributes($attribute) == true) {
+                continue;
+            }
 
-               $this->registerAttribute($object, $attribute, $value);
+            $this->registerAttribute($object, $attribute, $value);
+        }
 
-          }
+        return $object;
+    }
 
-          return $object;
+    /**
+     * تبدیل چند رکورد دیتابیس به collection
+     */
+    protected function arrayToObjects(array $array)
+    {
+        $collection = [];
 
-     }
+        foreach ($array as $val) {
+            $object = $this->arrayToAttributes($val);
+            array_push($collection, $object);
+        }
 
-     protected function arrayToObjects(array $array) {
-          $collection = [];
+        $this->collection = $collection;
+    }
 
-          foreach ($array as $val)
-          {
-               $object = $this->arrayToAttributes($val);
-               array_push($collection, $object);
-          }
+    /**
+     * بررسی hidden بودن attribute
+     */
+    private function inHiddenAttributes($attribute)
+    {
+        return in_array($attribute, $this->hidden);
+    }
 
-          $this->collection = $collection;
+    /**
+     * بررسی وجود attribute در casts
+     */
+    private function inCatsAttributes($attribute)
+    {
+        return in_array($attribute, array_keys($this->casts));
+    }
 
-     }
-     // $sql = "SELECT * FROM";
-// $sql = record1 , record2 , record3;
-// record1 = name = ali / age = 21 / pass = 123
+    /**
+     * تبدیل مقدار دیتابیس به نوع تعریف شده در casts
+     */
+    private function castDecodeValue($attributeKey, $val)
+    {
+        if (
+            $this->casts[$attributeKey] == 'array' ||
+            $this->casts[$attributeKey] == 'object'
+        ) {
+            return unserialize($val);
+        }
 
+        return $val;
+    }
 
+    /**
+     * تبدیل مقدار attribute برای ذخیره در دیتابیس
+     */
+    private function castEncodeValue($attributeKey, $val)
+    {
+        if (
+            $this->casts[$attributeKey] == 'array' ||
+            $this->casts[$attributeKey] == 'object'
+        ) {
+            return serialize($val);
+        }
 
+        return $val;
+    }
 
+    /**
+     * تبدیل تمام مقادیر قبل از ذخیره در دیتابیس
+     */
+    private function arrayToCastEncodeValue($vals)
+    {
+        $newArray = [];
 
+        foreach ($vals as $attr => $value) {
+            $this->inCatsAttributes($attr) == true
+                ? $newArray[$attr] = $this->castEncodeValue($attr, $value)
+                : $newArray[$attr] = $value;
+        }
 
-
-
-
-     private function inHiddenAttributes($attribute) {
-          return in_array($attribute, $this->hidden);
-     }
-
-     private function inCatsAttributes($attribute) {
-
-          return in_array($attribute, array_keys($this->casts));
-     }
-
-
-
-
-
-
-
-
-     // image = 'serialize' ['80*80'=> 'https://upload/image.png' , '140*240' => 'https://upload/image2.png']
-     private function castDecodeValue($attributeKey, $val) {
-        
-          if ($this->casts[$attributeKey] == 'array' || $this->casts[$attributeKey] == 'object')
-          {
-               return unserialize($val);
-          }
-          return $val;
-
-     }
-
-     private function castEncodeValue($attributeKey, $val) {
-
-          if ($this->casts[$attributeKey] == 'array' || $this->casts[$attributeKey] == 'object')
-          {
-               return serialize($val);
-          }
-          return $val;
-
-     }
-
-
-
-     private function arrayToCastEncodeValue($vals) {
-
-          $newArray = [];
-
-          foreach ($vals as $attr => $value)
-          {
-
-               $this->inCatsAttributes($attr) == true ? $newArray[$attr] = $this->castEncodeValue($attr, $value) :
-                    $newArray[$attr] = $value;
-          }
-
-          return $newArray;
-
-     }
-
-
+        return $newArray;
+    }
 }
